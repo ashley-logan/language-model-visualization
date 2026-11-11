@@ -1,0 +1,15 @@
+* red 0.2
+* blue 0.2
+* green 0.2
+* yellow 0.2
+* purple 0.2
+red apple 1
+blue apple 1
+green apple 1
+yellow apple 1
+purple apple 1
+apple pie 0.2
+apple sauce 0.2
+apple juice 0.2
+apple seed 0.2
+apple tree 0.2

@@ -1,0 +1,10 @@
+* the 1
+the cat 0.5
+the dog 0.5
+cat and 0.4
+cat sat 0.6
+dog and 0.4
+dog ran 0.6
+and the 1
+sat down 1
+ran away 1

@@ -1,0 +1,7 @@
+* robot 1
+robot beeped 0.85
+robot exploded 0.1
+robot sang 0.05
+beeped loudly 1
+exploded dramatically 1
+sang beautifully 1

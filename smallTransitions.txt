@@ -1,0 +1,10 @@
+* I 1
+I slept 0.34
+I ate 0.33
+I ran 0.33
+slept yesterday 0.5
+slept today 0.5
+ate yesterday 0.5
+ate today 0.5
+ran yesterday 0.5
+ran today 0.5
