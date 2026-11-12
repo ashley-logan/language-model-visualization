@@ -40,7 +40,7 @@ public class LanguageModelAL extends Application {
                             // associated with a clicked word
   private final int WINDOW_WIDTH = 800;  // window width in pixels
   private final int WINDOW_HEIGHT = 600; // window height in pixels
-  
+
   private final boolean TEST = true;
 
   public void start(Stage stage) throws IOException {
@@ -58,6 +58,7 @@ public class LanguageModelAL extends Application {
     // words, and then instantiate and initialize the WordAL array
 
     int lineCount = 0;
+    int edgeCount = 0;
     try {
       // count the number of lines in the file
       Scanner filescan = new Scanner(new File(filename));
@@ -65,29 +66,35 @@ public class LanguageModelAL extends Application {
         filescan.nextLine();
         lineCount++;
       }
-      if (TEST) System.out.println("DEBUG: lines in file: " + lineCount);
+      filescan.close();
+      if (TEST)
+        System.out.println("DEBUG: lines in file: " + lineCount);
 
       String[] dict = new String[lineCount * 2]; // unique words in file
       filescan = new Scanner(new File(filename));
 
-      int uniqueCount = 0; // keeps track of the number of unique words from the file
+      int uniqueCount =
+          0; // keeps track of the number of unique words from the file
       String firstWord;
       String secondWord;
-      int dictIdx = 0;
       // iterates through the first and second word on each line of the file
       for (int i = 0; i < lineCount; i++) {
         firstWord = filescan.next();
         secondWord = filescan.next();
-        if (TEST) System.out.println("DEBUG: Line " + i);
+        if (TEST)
+          System.out.println("DEBUG: Line " + i + "\n\t" + firstWord + " " +
+                             secondWord);
         filescan.nextLine();
 
         boolean repeatWord = false;
         // iterates through the unique words, checking if it contains the first
         // word
-        for (int j = 0; j < uniqueCount && !repeatWord; j++) {
-          repeatWord = (firstWord.equalsIgnoreCase(dict[j]))
+        for (int j = 0; (j < uniqueCount) && (!repeatWord); j++) {
+          repeatWord = (firstWord.equalsIgnoreCase(dict[j]));
         }
         if (!repeatWord) {
+          if (TEST)
+            System.out.println("DEBUG: " + firstWord + " is unique");
           dict[uniqueCount] = firstWord;
           uniqueCount++;
         }
@@ -95,37 +102,45 @@ public class LanguageModelAL extends Application {
         repeatWord = false;
         // iterates through the unique words, checking if it contains the second
         // word
-        for (int j = 0; j < uniqueCount && !repeatWord; j++) {
-          repeatWord = (secondWord.equalsIgnoreCase(dict[j]))
+        for (int j = 0; (j < uniqueCount) && (!repeatWord); j++) {
+          repeatWord = (secondWord.equalsIgnoreCase(dict[j]));
         }
         if (!repeatWord) {
+          if (TEST)
+            System.out.println("DEBUG: " + secondWord + " is unique");
           dict[uniqueCount] = secondWord;
           uniqueCount++;
         }
       }
-
+      filescan.close();
       words = new WordAL[uniqueCount];
-
       // iterates through the unique words dictionary and
       // instantiates word objects and inserts them into the words array
       for (int i = 0; i < uniqueCount; i++) {
-        words[i] = // WordAL;
-        String nextWords = new String[lineCount];
-        double probs = new double[lineCount];
-        int transitionCount = 0; // count of nextWords and count of probs for this word
+        String[] nextWords = new String[lineCount];
+        double[] probs = new double[lineCount];
+        int transitionCount =
+            0; // count of nextWords and count of probs for this word
         filescan = new Scanner(new File(filename));
 
         // iterates through the file, adding the next words and probabilties
         // associated with each unique word
         for (int j = 0; j < lineCount; j++) {
-          String firstWord = filescan.next();
-          if (firstWord.equalsIgnoreCase(dict[i])) {
+          String thisWord = filescan.next();
+          if (thisWord.equalsIgnoreCase(dict[i])) {
             nextWords[transitionCount] = filescan.next();
             probs[transitionCount] = filescan.nextDouble();
             transitionCount++;
           }
+          filescan.nextLine();
         }
-        // TODO: instantiate WordAL object
+        edgeCount += transitionCount;
+        words[i] = new WordAL(dict[i], transitionCount, nextWords, probs);
+        if (TEST) {
+          System.out.println("DEBUG");
+          System.out.println(words[i]);
+          System.out.println();
+        }
       }
 
     } catch (Exception e) {
@@ -141,36 +156,57 @@ public class LanguageModelAL extends Application {
     // highlight circle to the location of that word
     // For this code to work, it must include the methods called on a WordAL
     // object as shown in this code.
-    /*
-double centerX = WINDOW_WIDTH / 2.0;
-double centerY = WINDOW_HEIGHT / 2.0;
-double radius = Math.min(WINDOW_WIDTH, WINDOW_HEIGHT) / 2.0 - 80;
-for (int i = 0; i < words.length; i++) {
-double angle = 2 * Math.PI * i / words.length - Math.PI / 2;
-words[i].setPosition(centerX + radius * Math.cos(angle),
-                                                            centerY + radius *
-Math.sin(angle));
-}
+    double centerX = WINDOW_WIDTH / 2.0;
+    double centerY = WINDOW_HEIGHT / 2.0;
+    double radius = Math.min(WINDOW_WIDTH, WINDOW_HEIGHT) / 2.0 - 80;
+    for (int i = 0; i < words.length; i++) {
+      double angle = 2 * Math.PI * i / words.length - Math.PI / 2;
+      words[i].setPosition(centerX + radius * Math.cos(angle),
+                           centerY + radius * Math.sin(angle));
+    }
 
     for (int i = 0; i < words.length; i++) {
-Text label = new Text(words[i].getX(), words[i].getY(), words[i].getText());
-label.setFont(Font.font("System", FontWeight.BOLD, 16));
-root.getChildren().add(label);
-}
+      Text label =
+          new Text(words[i].getX(), words[i].getY(), words[i].getText());
+      label.setFont(Font.font("System", FontWeight.BOLD, 16));
+      root.getChildren().add(label);
+    }
 
     currentWord = words[0];
-spotlight = new Circle(words[0].getX(), words[0].getY(), 30);
-spotlight.setFill(null);
-spotlight.setStroke(Color.YELLOW);
-spotlight.setStrokeWidth(4);
-root.getChildren().add(spotlight);
-    */
+    spotlight = new Circle(words[0].getX(), words[0].getY(), 30);
+    spotlight.setFill(null);
+    spotlight.setStroke(Color.YELLOW);
+    spotlight.setStrokeWidth(4);
+    root.getChildren().add(spotlight);
 
     // TODO: add code to draw the lines between WordAL objects connected by
     // transitions and include them in the root Group
     // NOTE: given a Line object, the toBack() method can be called on it to
     // have it fall behind other objects in the visualization
+    //
+    // First loop: iterate though words array
+    // Second loop: iterate through current word's transitions
+    // Third loop: iterate through words array to match current transition word
 
+    edges = new EdgeAL[edgeCount];
+    int edgesIdx = 0;
+    for (int i = 0; i < words.length; i++) {
+      WordAL thisWord = words[i];
+      for (int j = 0; j < words.length; j++) {
+        WordAL otherWord = words[j];
+        if (thisWord.hasTransitionTo(otherWord.getText())) {
+          int xFrom = thisWord.getX();
+          int yFrom = thisWord.getY();
+          int xTo = otherWord.getX();
+          int yTo = otherWord.getY();
+          Line edgeLine = new Line(xFrom, yFrom, xTo, yTo);
+          edges[edgesIdx] = new EdgeAL(thisWord, otherWord, edgeLine);
+          edgesIdx++;
+          root.getChildren().add(edgeLine);
+          root.getChildren().add(this::arrowhead(edgeLine));
+        }
+      }
+    }
     // Add the "Next word" button in the bottom-left corner
     Button nextButton = new Button("Next word");
     nextButton.setTranslateX(20);
